@@ -2,7 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fff5f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Даяна">
+<meta name="format-detection" content="telephone=no">
 <title>для тебя 🎀</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,31 +26,50 @@
     --text-soft:#9b7b8a;
     --white:#fffafc;
     --shadow:rgba(255,143,171,.25);
+
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
   }
 
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{
+    scroll-behavior:smooth;
+    -webkit-text-size-adjust:100%;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:none;
+  }
+  html,body{max-width:100%;overflow-x:hidden;}
 
   body{
-    font-family:'Nunito',sans-serif;
+    font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     color:var(--text);
-    overflow-x:hidden;
     background:
       radial-gradient(circle at 15% 10%, #ffe4ec 0%, transparent 45%),
       radial-gradient(circle at 85% 20%, #e8dcf7 0%, transparent 50%),
       radial-gradient(circle at 50% 90%, #ffe9e0 0%, transparent 55%),
       linear-gradient(180deg, #fff5f8 0%, #ffeaf1 100%);
-    background-attachment:fixed;
-    cursor:none;
+    background-attachment:scroll;
+    touch-action:manipulation;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  @media(min-width:900px){
+    body{background-attachment:fixed;}
   }
 
-  /* ========== МИЛЫЙ КУРСОР ========== */
+  @media (pointer: fine){ body{cursor:none;} }
+  @media (pointer: coarse){ body{cursor:auto;} }
+
+  /* ========== МИЛЫЙ КУРСОР (только desktop) ========== */
   .cursor{
     position:fixed;width:24px;height:24px;pointer-events:none;z-index:9999;
     font-size:18px;line-height:24px;text-align:center;
     transform:translate(-50%,-50%);
     transition:transform .15s ease;
     filter:drop-shadow(0 2px 4px rgba(255,92,138,.4));
+    display:none;
   }
   .cursor-trail{
     position:fixed;width:8px;height:8px;pointer-events:none;z-index:9998;
@@ -53,12 +77,141 @@
     border-radius:50%;
     transform:translate(-50%,-50%);
     animation:trailFade .9s forwards;
+    display:none;
+  }
+  @media (pointer: fine){
+    .cursor, .cursor-trail{display:block;}
   }
   @keyframes trailFade{
     from{opacity:.8;transform:translate(-50%,-50%) scale(1);}
     to{opacity:0;transform:translate(-50%,-50%) scale(2);}
   }
-  @media(max-width:900px){ body{cursor:auto;} .cursor{display:none;} }
+
+  /* ========== МУЗЫКАЛЬНАЯ КНОПКА ========== */
+  .music-btn{
+    position:fixed;
+    right:14px;
+    top:calc(var(--sat) + 50px);
+    z-index:150;
+    width:52px;height:52px;
+    border-radius:50%;
+    border:2px solid #fff;
+    background:linear-gradient(135deg,var(--pink-2),var(--hot-pink));
+    color:#fff;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 25px rgba(255,92,138,.45);
+    transition:transform .25s, box-shadow .25s, opacity .3s;
+    -webkit-tap-highlight-color:transparent;
+    overflow:hidden;
+    padding:0;
+  }
+  .music-btn::before{
+    content:'♪';
+    position:absolute;
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    transition:.3s;
+  }
+  .music-btn:active{
+    transform:scale(.9);
+  }
+  .music-btn.playing{
+    animation:pulseMusic 2s ease-in-out infinite;
+  }
+  .music-btn.playing::before{
+    content:'♫';
+  }
+
+  @keyframes pulseMusic{
+    0%,100%{
+      box-shadow:0 8px 25px rgba(255,92,138,.45),
+                 0 0 0 0 rgba(255,92,138,.5);
+    }
+    50%{
+      box-shadow:0 8px 25px rgba(255,92,138,.45),
+                 0 0 0 14px rgba(255,92,138,0);
+    }
+  }
+
+  /* Эквалайзер внутри кнопки (когда играет) */
+  .music-btn .eq{
+    display:none;
+    gap:3px;
+    align-items:flex-end;
+    height:22px;
+    position:relative;
+    z-index:2;
+  }
+  .music-btn.playing .eq{display:flex;}
+  .music-btn.playing::before{display:none;}
+  .music-btn .eq span{
+    display:block;
+    width:3px;
+    background:#fff;
+    border-radius:2px;
+    animation:eqBar .9s ease-in-out infinite;
+  }
+  .music-btn .eq span:nth-child(1){height:8px;animation-delay:0s;}
+  .music-btn .eq span:nth-child(2){height:16px;animation-delay:.15s;}
+  .music-btn .eq span:nth-child(3){height:10px;animation-delay:.3s;}
+  .music-btn .eq span:nth-child(4){height:18px;animation-delay:.45s;}
+  @keyframes eqBar{
+    0%,100%{transform:scaleY(.4);}
+    50%{transform:scaleY(1);}
+  }
+
+  @media(min-width:900px){
+    .music-btn{
+      top:calc(var(--sat) + 20px);
+      right:20px;
+      width:56px;height:56px;
+      font-size:24px;
+    }
+  }
+
+  /* Подсказка "включи музыку" (показывается если автоплей заблокирован) */
+  .music-hint{
+    position:fixed;
+    right:76px;
+    top:calc(var(--sat) + 62px);
+    z-index:149;
+    background:rgba(255,250,252,.96);
+    border:2px solid var(--pink-2);
+    color:var(--hot-pink);
+    font-size:12px;
+    font-weight:700;
+    padding:8px 14px;
+    border-radius:50px;
+    box-shadow:0 8px 20px rgba(255,143,171,.3);
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s;
+    font-family:'Nunito',sans-serif;
+  }
+  .music-hint.show{opacity:1;pointer-events:auto;}
+  .music-hint::after{
+    content:'';
+    position:absolute;
+    right:-6px;top:50%;
+    transform:translateY(-50%);
+    width:10px;height:10px;
+    background:rgba(255,250,252,.96);
+    border-right:2px solid var(--pink-2);
+    border-top:2px solid var(--pink-2);
+    transform:translateY(-50%) rotate(45deg);
+  }
+  .music-hint:active{transform:scale(.95);}
+  @media(min-width:900px){
+    .music-hint{
+      right:88px;
+      top:calc(var(--sat) + 32px);
+      font-size:13px;
+      padding:9px 16px;
+    }
+  }
 
   /* ========== ЗАГРУЗКА ========== */
   #loader{
@@ -67,8 +220,9 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:25px;
     transition:opacity .8s, visibility .8s;
+    padding: var(--sat) 20px var(--sab);
   }
-  #loader.hide{opacity:0;visibility:hidden;}
+  #loader.hide{opacity:0;visibility:hidden;pointer-events:none;}
   .loader-heart{
     font-size:60px;
     animation:beat 1.1s ease-in-out infinite;
@@ -82,6 +236,7 @@
     font-family:'Caveat',cursive;
     font-size:26px;color:var(--hot-pink);font-weight:600;
     letter-spacing:1px;
+    text-align:center;
   }
 
   /* ========== ЛЕТЯЩИЕ БЛЁСТКИ ========== */
@@ -94,74 +249,114 @@
     background-size:200% 100%;
     animation:shimmer 6s ease infinite;
     text-align:center;
-    padding:10px;
+    padding:calc(var(--sat) + 8px) 12px 8px;
     font-family:'Caveat',cursive;
-    font-size:17px;
+    font-size:16px;
     color:#fff;
     font-weight:600;
     letter-spacing:1px;
     box-shadow:0 4px 20px rgba(255,143,171,.4);
+    line-height:1.2;
   }
   @keyframes shimmer{
     0%,100%{background-position:0% 50%;}
     50%{background-position:100% 50%;}
   }
   .ribbon::before,.ribbon::after{
-    content:'🎀';margin:0 12px;
+    content:'🎀';margin:0 8px;
+  }
+
+  /* ========== ПРОГРЕСС ========== */
+  .progress{
+    position:fixed;
+    top:calc(var(--sat) + 36px);
+    left:0;right:0;
+    height:3px;z-index:98;
+    pointer-events:none;
+  }
+  .progress span{
+    display:block;height:100%;width:0;
+    background:linear-gradient(90deg,var(--pink-3),var(--lav-2),var(--hot-pink));
+    border-radius:0 3px 3px 0;
+    transition:width .1s;
   }
 
   /* ========== НАВИГАЦИЯ ========== */
   nav{
-    position:fixed;top:55px;left:50%;transform:translateX(-50%);
+    position:fixed;
+    bottom:0;left:0;right:0;
     z-index:99;
     display:flex;gap:4px;
-    padding:8px 12px;
-    background:rgba(255,250,252,.85);
+    padding:10px 10px calc(var(--sab) + 10px);
+    background:rgba(255,250,252,.92);
+    -webkit-backdrop-filter:blur(15px);
     backdrop-filter:blur(15px);
-    border:2px solid #fff;
-    border-radius:50px;
-    box-shadow:0 8px 30px rgba(255,143,171,.25);
+    border-top:2px solid #fff;
+    box-shadow:0 -8px 30px rgba(255,143,171,.25);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    scroll-snap-type:x proximity;
   }
+  nav::-webkit-scrollbar{display:none;}
   nav a{
     color:var(--text-soft);
     text-decoration:none;
-    font-size:13px;
-    font-weight:600;
-    padding:8px 18px;
+    font-size:12px;
+    font-weight:700;
+    padding:10px 16px;
     border-radius:50px;
-    transition:.3s;
+    transition:.25s;
     white-space:nowrap;
+    flex-shrink:0;
+    scroll-snap-align:center;
+    min-height:40px;
+    display:inline-flex;
+    align-items:center;
   }
-  nav a:hover{color:var(--hot-pink);background:var(--pink);}
+  nav a:active{transform:scale(.94);background:var(--pink);}
   nav a.active{color:#fff;background:var(--hot-pink);}
-  @media(max-width:700px){
-    nav{padding:6px;gap:2px;max-width:calc(100vw - 20px);overflow-x:auto;top:50px;}
-    nav a{padding:7px 12px;font-size:11px;}
-    nav::-webkit-scrollbar{display:none;}
+
+  @media(min-width:900px){
+    nav{
+      bottom:auto;
+      top:calc(var(--sat) + 50px);
+      left:50%;right:auto;
+      transform:translateX(-50%);
+      padding:8px 12px;
+      border:2px solid #fff;
+      border-top:2px solid #fff;
+      border-radius:50px;
+      box-shadow:0 8px 30px rgba(255,143,171,.25);
+      overflow:visible;
+    }
+    nav a{font-size:13px;padding:8px 18px;min-height:0;}
+    nav a:active{transform:none;background:var(--pink);}
   }
 
   /* ========== СЕКЦИИ ========== */
   section{
     position:relative;z-index:2;
-    padding:100px 8vw;
+    padding:120px 20px calc(var(--sab) + 100px);
     min-height:100vh;
+    min-height:100dvh;
     display:flex;flex-direction:column;justify-content:center;
   }
   .section-label{
     font-family:'Caveat',cursive;
-    font-size:22px;
+    font-size:20px;
     color:var(--lav-2);
     font-weight:600;
-    margin-bottom:12px;
+    margin-bottom:10px;
     display:inline-flex;align-items:center;gap:10px;
     width:fit-content;
   }
-  .section-label::before{content:'✿';font-size:18px;}
+  .section-label::before{content:'✿';font-size:16px;}
   .section-title{
     font-family:'Pacifico',cursive;
-    font-size:clamp(2.2rem,6vw,4rem);
+    font-size:clamp(1.9rem,8vw,3rem);
     color:var(--text);
-    margin-bottom:50px;
+    margin-bottom:35px;
     line-height:1.15;
     font-weight:400;
   }
@@ -169,24 +364,30 @@
   .section-title .c2{color:var(--lav-2);}
   .section-title .c3{color:#ffb389;}
 
-  .reveal{opacity:0;transform:translateY(40px);transition:all .9s cubic-bezier(.16,1,.3,1);}
+  .reveal{opacity:0;transform:translateY(30px);transition:all .8s cubic-bezier(.16,1,.3,1);}
   .reveal.show{opacity:1;transform:translateY(0);}
+
+  @media(min-width:900px){
+    section{padding:120px 8vw 100px;}
+    .section-label{font-size:22px;margin-bottom:12px;}
+    .section-title{font-size:clamp(2.2rem,6vw,4rem);margin-bottom:50px;}
+  }
 
   /* ========== ГЛАВНАЯ ========== */
   .hero{
-    min-height:100vh;
-    padding-top:150px;
+    padding-top:calc(var(--sat) + 100px);
     display:grid;
-    grid-template-columns:1.1fr 1fr;
-    gap:60px;
+    grid-template-columns:1fr;
+    gap:30px;
     align-items:center;
   }
+  .hero-left{text-align:center;}
   .hero-left h1{
     font-family:'Pacifico',cursive;
-    font-size:clamp(2rem,5.5vw,4.2rem);
+    font-size:clamp(1.7rem,7vw,2.4rem);
     color:var(--text);
     line-height:1.2;
-    margin-bottom:25px;
+    margin-bottom:20px;
     font-weight:400;
   }
   .hero-left h1 .name{
@@ -196,132 +397,130 @@
   }
   .hero-left h1 .name::after{
     content:'';
-    position:absolute;bottom:-8px;left:0;right:0;
+    position:absolute;bottom:-6px;left:0;right:0;
     height:10px;
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0,5 Q25,0 50,5 T100,5' stroke='%23ffb3c6' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/100% 100%;
   }
   .hero-left .greeting{
     font-family:'Caveat',cursive;
-    font-size:26px;
+    font-size:22px;
     color:var(--lav-2);
-    margin-bottom:15px;
+    margin-bottom:10px;
     font-weight:500;
   }
   .hero-left p.intro{
-    font-size:1.05rem;
-    line-height:1.8;
+    font-size:.98rem;
+    line-height:1.7;
     color:var(--text-soft);
     max-width:520px;
-    margin-bottom:30px;
+    margin:0 auto 25px;
   }
   .hero-stickers{
-    display:flex;flex-wrap:wrap;gap:10px;margin-bottom:35px;
+    display:flex;flex-wrap:wrap;gap:8px;margin-bottom:25px;
+    justify-content:center;
   }
   .hero-stickers span{
-    padding:9px 18px;
+    padding:8px 16px;
     background:var(--white);
     border:2px dashed var(--pink-2);
     border-radius:50px;
-    font-size:13px;
+    font-size:12px;
     font-weight:600;
     color:var(--text);
     transition:.3s;
   }
-  .hero-stickers span:hover{
+  .hero-stickers span:active{
     transform:rotate(-3deg) scale(1.05);
     border-color:var(--hot-pink);
     background:var(--pink);
   }
-  .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+  .hero-btns{
+    display:flex;gap:10px;flex-wrap:wrap;
+    justify-content:center;
+  }
   .btn{
-    padding:14px 30px;
+    padding:15px 26px;
     border-radius:50px;
     font-family:'Nunito',sans-serif;
     font-size:14px;font-weight:700;
     text-decoration:none;
-    cursor:none;
-    transition:.35s;
+    transition:.25s;
     border:none;
     display:inline-flex;align-items:center;gap:8px;
     letter-spacing:.3px;
+    min-height:48px;
+    -webkit-tap-highlight-color:transparent;
   }
+  .btn:active{transform:scale(.96);}
   .btn-pink{
     background:var(--hot-pink);
     color:#fff;
     box-shadow:0 8px 25px rgba(255,92,138,.35);
-  }
-  .btn-pink:hover{
-    transform:translateY(-3px) rotate(-1deg);
-    box-shadow:0 12px 35px rgba(255,92,138,.5);
   }
   .btn-white{
     background:#fff;
     color:var(--hot-pink);
     border:2px solid var(--pink-2);
   }
-  .btn-white:hover{
-    transform:translateY(-3px) rotate(1deg);
-    border-color:var(--hot-pink);
-  }
 
-  /* Полароид */
   .hero-right{
     display:flex;justify-content:center;
     position:relative;
+    order:-1;
   }
   .polaroid{
     background:#fff;
-    padding:16px 16px 60px;
+    padding:14px 14px 52px;
     border-radius:6px;
     box-shadow:0 20px 50px rgba(255,143,171,.35);
-    transform:rotate(-4deg);
+    transform:rotate(-3deg);
     transition:.5s cubic-bezier(.16,1,.3,1);
     position:relative;
-    max-width:380px;width:100%;
+    max-width:300px;width:100%;
+    margin-top:20px;
   }
-  .polaroid:hover{transform:rotate(0deg) scale(1.03);}
   .polaroid .photo{
     width:100%;aspect-ratio:4/5;
     overflow:hidden;border-radius:3px;
     background:linear-gradient(135deg,#ffe4ec,#e8dcf7);
     position:relative;
   }
-  .polaroid .photo img{width:100%;height:100%;object-fit:cover;}
+  .polaroid .photo img{width:100%;height:100%;object-fit:cover;display:block;}
   .polaroid .caption{
-    position:absolute;bottom:16px;left:0;right:0;
+    position:absolute;bottom:14px;left:0;right:0;
     text-align:center;
     font-family:'Caveat',cursive;
-    font-size:22px;color:var(--text);
+    font-size:20px;color:var(--text);
     font-weight:600;
   }
   .polaroid .tape{
-    position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-3deg);
-    width:90px;height:28px;
-    background:rgba(255,209,220,.7);
+    position:absolute;top:-12px;left:50%;transform:translateX(-50%) rotate(-3deg);
+    width:80px;height:24px;
+    background:rgba(255,209,220,.75);
     border:1px dashed rgba(255,143,171,.5);
+    -webkit-backdrop-filter:blur(2px);
     backdrop-filter:blur(2px);
   }
   .polaroid .tape.left{
-    left:20px;top:-12px;transform:rotate(-15deg);
-    width:70px;
+    left:15px;top:-10px;transform:rotate(-15deg);
+    width:60px;height:22px;
   }
   .polaroid .tape.right{
-    right:20px;left:auto;top:-12px;transform:rotate(12deg);
-    width:70px;
+    right:15px;left:auto;top:-10px;transform:rotate(12deg);
+    width:60px;height:22px;
   }
 
-  /* Наклейка "подарок" */
   .gift-sticker{
     position:absolute;
-    top:-30px;right:-30px;
-    width:110px;height:110px;
+    top:-22px;right:-14px;
+    width:88px;height:88px;
     background:linear-gradient(135deg,#ffb3c6,#ff8fab);
     border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     flex-direction:column;
     color:#fff;
     font-family:'Caveat',cursive;
-    font-size:20px;
+    font-size:16px;
     font-weight:700;
     transform:rotate(15deg);
     box-shadow:0 10px 30px rgba(255,92,138,.4);
@@ -330,38 +529,58 @@
     z-index:3;
     text-align:center;
     line-height:1;
-    padding:10px;
+    padding:8px;
   }
-  .gift-sticker .icon{font-size:28px;margin-bottom:4px;}
+  .gift-sticker .icon{font-size:22px;margin-bottom:2px;}
   @keyframes wiggle{
     0%,100%{transform:rotate(15deg);}
     50%{transform:rotate(5deg) scale(1.05);}
   }
-  @media(max-width:900px){
-    .hero{grid-template-columns:1fr;padding-top:170px;gap:40px;}
-    .hero-right{order:-1;}
-    .polaroid{max-width:280px;}
-    .gift-sticker{width:90px;height:90px;top:-20px;right:-10px;font-size:16px;}
-    .gift-sticker .icon{font-size:22px;}
-    .friend-card .img-wrap{aspect-ratio:1/1;}
+
+  @media(min-width:900px){
+    .hero{
+      padding-top:150px;
+      grid-template-columns:1.1fr 1fr;
+      gap:60px;
+    }
+    .hero-left{text-align:left;}
+    .hero-left h1{font-size:clamp(2rem,5.5vw,4.2rem);margin-bottom:25px;}
+    .hero-left .greeting{font-size:26px;margin-bottom:15px;}
+    .hero-left p.intro{font-size:1.05rem;line-height:1.8;margin:0 0 30px;}
+    .hero-stickers{margin-bottom:35px;justify-content:flex-start;}
+    .hero-stickers span{font-size:13px;padding:9px 18px;}
+    .hero-btns{justify-content:flex-start;}
+    .hero-right{order:0;}
+    .polaroid{max-width:380px;padding:16px 16px 60px;transform:rotate(-4deg);margin-top:0;}
+    .polaroid .caption{font-size:22px;bottom:16px;}
+    .polaroid .tape{width:90px;height:28px;top:-14px;}
+    .polaroid .tape.left,.polaroid .tape.right{width:70px;top:-12px;}
+    .gift-sticker{
+      width:110px;height:110px;
+      top:-30px;right:-30px;
+      font-size:20px;
+      padding:10px;
+    }
+    .gift-sticker .icon{font-size:28px;margin-bottom:4px;}
   }
 
   /* ========== ОБО МНЕ ========== */
   .about-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:20px;
+    grid-template-columns:1fr;
+    gap:14px;
   }
   .about-card{
-    padding:32px 26px;
+    padding:24px 22px;
     background:var(--white);
     border:2px solid #fff;
-    border-radius:28px;
+    border-radius:24px;
     box-shadow:0 10px 30px rgba(255,143,171,.15);
-    transition:.4s cubic-bezier(.16,1,.3,1);
+    transition:.3s cubic-bezier(.16,1,.3,1);
     position:relative;
     overflow:hidden;
   }
+  .about-card:active{transform:scale(.98);}
   .about-card::before{
     content:'';
     position:absolute;top:-40px;right:-40px;
@@ -374,52 +593,58 @@
   .about-card:nth-child(2)::before{background:var(--lav);}
   .about-card:nth-child(3)::before{background:var(--peach);}
   .about-card:nth-child(4)::before{background:var(--pink-2);}
-  .about-card:hover{
-    transform:translateY(-8px) rotate(-1deg);
-    box-shadow:0 20px 45px rgba(255,143,171,.28);
-    border-color:var(--pink-2);
-  }
-  .about-card:hover::before{transform:scale(1.3);}
   .about-card .icon{
-    font-size:32px;margin-bottom:15px;display:block;position:relative;z-index:2;
+    font-size:30px;margin-bottom:12px;display:block;position:relative;z-index:2;
   }
   .about-card h3{
     font-family:'Pacifico',cursive;
-    font-size:1.15rem;
+    font-size:1.1rem;
     color:var(--text);
-    margin-bottom:12px;
+    margin-bottom:10px;
     font-weight:400;
     position:relative;z-index:2;
   }
   .about-card p{
     color:var(--text-soft);
     font-size:.92rem;
-    line-height:1.7;
+    line-height:1.65;
     position:relative;z-index:2;
+  }
+  @media(min-width:900px){
+    .about-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;}
+    .about-card{padding:32px 26px;border-radius:28px;}
+    .about-card:hover{
+      transform:translateY(-8px) rotate(-1deg);
+      box-shadow:0 20px 45px rgba(255,143,171,.28);
+      border-color:var(--pink-2);
+    }
+    .about-card:hover::before{transform:scale(1.3);}
+    .about-card .icon{font-size:32px;margin-bottom:15px;}
+    .about-card h3{font-size:1.15rem;margin-bottom:12px;}
   }
 
   /* ========== ФОТО ========== */
   .photos-wrap{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:30px;
-    padding:20px 0;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+    padding:20px 0 0;
   }
   .photo-item{
     background:#fff;
-    padding:12px 12px 55px;
+    padding:9px 9px 42px;
     border-radius:6px;
-    box-shadow:0 15px 35px rgba(255,143,171,.2);
-    transition:.5s cubic-bezier(.16,1,.3,1);
+    box-shadow:0 12px 30px rgba(255,143,171,.2);
+    transition:.4s cubic-bezier(.16,1,.3,1);
     position:relative;
-    cursor:none;
+    -webkit-tap-highlight-color:transparent;
   }
   .photo-item:nth-child(odd){transform:rotate(-2deg);}
   .photo-item:nth-child(even){transform:rotate(2deg);}
   .photo-item:nth-child(3n){transform:rotate(-1deg);}
-  .photo-item:hover{
-    transform:rotate(0deg) scale(1.05) translateY(-5px);
-    box-shadow:0 25px 55px rgba(255,143,171,.35);
+  .photo-item:active{
+    transform:rotate(0deg) scale(1.03);
+    box-shadow:0 20px 45px rgba(255,143,171,.35);
     z-index:5;
   }
   .photo-item .img-wrap{
@@ -429,107 +654,136 @@
   }
   .photo-item img{
     width:100%;height:100%;object-fit:cover;
-    transition:.6s;
+    transition:.5s;
+    display:block;
   }
-  .photo-item:hover img{transform:scale(1.08);}
+  .photo-item:active img{transform:scale(1.06);}
   .photo-item .cap{
-    position:absolute;bottom:15px;left:0;right:0;
+    position:absolute;bottom:10px;left:4px;right:4px;
     text-align:center;
     font-family:'Caveat',cursive;
-    font-size:20px;
+    font-size:17px;
     color:var(--text);
     font-weight:600;
+    line-height:1;
   }
   .photo-item .mini-tape{
-    position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);
-    width:70px;height:22px;
-    background:rgba(255,209,220,.75);
+    position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-2deg);
+    width:55px;height:18px;
+    background:rgba(255,209,220,.8);
     border:1px dashed rgba(255,143,171,.5);
+  }
+  @media(min-width:900px){
+    .photos-wrap{
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:30px;
+    }
+    .photo-item{padding:12px 12px 55px;}
+    .photo-item:hover{
+      transform:rotate(0deg) scale(1.05) translateY(-5px);
+      box-shadow:0 25px 55px rgba(255,143,171,.35);
+      z-index:5;
+    }
+    .photo-item:hover img{transform:scale(1.08);}
+    .photo-item .cap{font-size:20px;bottom:15px;left:0;right:0;}
+    .photo-item .mini-tape{width:70px;height:22px;top:-10px;}
   }
 
   /* ========== ДРУЗЬЯ ========== */
   .friends-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:25px;
+    grid-template-columns:1fr;
+    gap:20px;
   }
   .friend-card{
     background:var(--white);
-    border-radius:28px;
-    padding:16px 16px 25px;
+    border-radius:24px;
+    padding:14px 14px 22px;
     box-shadow:0 15px 35px rgba(255,143,171,.18);
-    transition:.5s cubic-bezier(.16,1,.3,1);
+    transition:.35s cubic-bezier(.16,1,.3,1);
     position:relative;
-    cursor:none;
+    -webkit-tap-highlight-color:transparent;
   }
-  .friend-card:hover{
-    transform:translateY(-8px) rotate(1deg);
-    box-shadow:0 25px 55px rgba(255,143,171,.32);
-  }
+  .friend-card:active{transform:scale(.98);}
   .friend-card .img-wrap{
-    width:100%;aspect-ratio:1/1;
-    border-radius:20px;
+    width:100%;
+    aspect-ratio:1/1;
+    border-radius:18px;
     overflow:hidden;
     background:linear-gradient(135deg,#ffe4ec,#e8dcf7);
     position:relative;
-    margin-bottom:18px;
+    margin-bottom:16px;
   }
   .friend-card .img-wrap img{
-    width:100%;height:100%;object-fit:cover;
+    width:100%;height:100%;
+    object-fit:cover;
     object-position:center center;
-    transition:.6s;
+    transition:.5s;
+    display:block;
   }
-  .friend-card:hover .img-wrap img{transform:scale(1.06);}
+  .friend-card:active .img-wrap img{transform:scale(1.04);}
   .friend-card .tag{
-    position:absolute;top:14px;left:14px;
+    position:absolute;top:12px;left:12px;
     padding:6px 14px;
     background:var(--hot-pink);
     color:#fff;
     border-radius:50px;
-    font-size:11px;
+    font-size:10px;
     font-weight:700;
-    letter-spacing:1px;
+    letter-spacing:.5px;
     text-transform:uppercase;
     z-index:2;
+    box-shadow:0 4px 12px rgba(255,92,138,.3);
   }
   .friend-card h3{
     font-family:'Pacifico',cursive;
-    font-size:1.2rem;
+    font-size:1.15rem;
     color:var(--text);
     margin-bottom:8px;
     font-weight:400;
-    padding:0 8px;
+    padding:0 6px;
   }
   .friend-card p{
     color:var(--text-soft);
     font-size:.9rem;
     line-height:1.6;
-    padding:0 8px;
+    padding:0 6px;
+  }
+  @media(min-width:700px){
+    .friends-grid{grid-template-columns:repeat(2,1fr);gap:22px;}
+  }
+  @media(min-width:1000px){
+    .friends-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;}
+    .friend-card{border-radius:28px;padding:16px 16px 25px;}
+    .friend-card:hover{
+      transform:translateY(-8px) rotate(1deg);
+      box-shadow:0 25px 55px rgba(255,143,171,.32);
+    }
+    .friend-card:hover .img-wrap img{transform:scale(1.06);}
+    .friend-card .img-wrap{border-radius:20px;margin-bottom:18px;}
+    .friend-card h3{font-size:1.2rem;padding:0 8px;}
+    .friend-card p{padding:0 8px;}
   }
 
   /* ========== ФАКТЫ ========== */
   .facts-list{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:18px;
+    grid-template-columns:1fr;
+    gap:12px;
   }
   .fact{
-    padding:24px 26px;
+    padding:18px 20px;
     background:var(--white);
-    border-radius:24px;
-    display:flex;gap:18px;align-items:flex-start;
+    border-radius:20px;
+    display:flex;gap:14px;align-items:center;
     box-shadow:0 8px 25px rgba(255,143,171,.12);
-    transition:.4s;
+    transition:.3s;
     border:2px solid #fff;
   }
-  .fact:hover{
-    transform:translateX(6px);
-    border-color:var(--pink-2);
-    box-shadow:0 12px 35px rgba(255,143,171,.22);
-  }
+  .fact:active{transform:scale(.99);border-color:var(--pink-2);}
   .fact .ico{
-    font-size:26px;flex-shrink:0;
-    width:50px;height:50px;
+    font-size:22px;flex-shrink:0;
+    width:44px;height:44px;
     background:var(--pink);
     border-radius:50%;
     display:flex;align-items:center;justify-content:center;
@@ -538,69 +792,92 @@
   .fact:nth-child(3n) .ico{background:var(--peach);}
   .fact p{
     color:var(--text);
-    font-size:.98rem;
-    line-height:1.65;
+    font-size:.94rem;
+    line-height:1.55;
     font-weight:500;
+  }
+  @media(min-width:900px){
+    .facts-list{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
+    .fact{padding:24px 26px;border-radius:24px;gap:18px;align-items:flex-start;}
+    .fact:hover{
+      transform:translateX(6px);
+      border-color:var(--pink-2);
+      box-shadow:0 12px 35px rgba(255,143,171,.22);
+    }
+    .fact .ico{width:50px;height:50px;font-size:26px;}
   }
 
   /* ========== ХОББИ ========== */
   .hobby-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:16px;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
   }
   .hobby{
-    padding:30px 18px;
+    padding:22px 12px;
     background:var(--white);
-    border-radius:26px;
+    border-radius:22px;
     text-align:center;
-    transition:.4s cubic-bezier(.16,1,.3,1);
+    transition:.3s cubic-bezier(.16,1,.3,1);
     box-shadow:0 8px 22px rgba(255,143,171,.12);
     border:2px solid #fff;
-    cursor:none;
+    -webkit-tap-highlight-color:transparent;
   }
-  .hobby:hover{
-    transform:translateY(-8px) rotate(-3deg);
+  .hobby:active{
+    transform:scale(.96) rotate(-2deg);
     border-color:var(--pink-2);
-    box-shadow:0 18px 40px rgba(255,143,171,.28);
   }
   .hobby .emoji{
-    font-size:38px;display:block;margin-bottom:14px;
-    transition:.4s;
+    font-size:32px;display:block;margin-bottom:10px;
+    transition:.3s;
   }
-  .hobby:hover .emoji{transform:scale(1.25) rotate(12deg);}
+  .hobby:active .emoji{transform:scale(1.15) rotate(8deg);}
   .hobby h4{
     font-family:'Pacifico',cursive;
-    font-size:1rem;color:var(--text);
-    margin-bottom:6px;font-weight:400;
+    font-size:.95rem;color:var(--text);
+    margin-bottom:4px;font-weight:400;
   }
-  .hobby p{color:var(--text-soft);font-size:.82rem;line-height:1.5;}
+  .hobby p{color:var(--text-soft);font-size:.78rem;line-height:1.4;}
+  @media(min-width:900px){
+    .hobby-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;}
+    .hobby{padding:30px 18px;border-radius:26px;}
+    .hobby:hover{
+      transform:translateY(-8px) rotate(-3deg);
+      border-color:var(--pink-2);
+      box-shadow:0 18px 40px rgba(255,143,171,.28);
+    }
+    .hobby:hover .emoji{transform:scale(1.25) rotate(12deg);}
+    .hobby .emoji{font-size:38px;margin-bottom:14px;}
+    .hobby h4{font-size:1rem;margin-bottom:6px;}
+    .hobby p{font-size:.82rem;line-height:1.5;}
+  }
 
   /* ========== КОНТАКТЫ ========== */
   .contact-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:18px;
+    grid-template-columns:1fr;
+    gap:14px;
   }
   .contact{
     display:flex;flex-direction:column;
-    gap:6px;
-    padding:26px 28px;
+    gap:4px;
+    padding:22px 60px 22px 24px;
     background:var(--white);
-    border-radius:24px;
+    border-radius:22px;
     text-decoration:none;
     color:var(--text);
     border:2px solid #fff;
-    transition:.4s cubic-bezier(.16,1,.3,1);
+    transition:.3s cubic-bezier(.16,1,.3,1);
     box-shadow:0 8px 22px rgba(255,143,171,.12);
     position:relative;
     overflow:hidden;
-    cursor:none;
+    min-height:80px;
+    justify-content:center;
+    -webkit-tap-highlight-color:transparent;
   }
-  .contact:hover{
-    transform:translateY(-6px) rotate(1deg);
+  .contact:active{
+    transform:scale(.98);
     border-color:var(--pink-2);
-    box-shadow:0 18px 40px rgba(255,143,171,.3);
   }
   .contact::after{
     content:'→';
@@ -610,18 +887,31 @@
     font-size:22px;
     transition:.3s;
   }
-  .contact:hover::after{transform:translateY(-50%) translateX(5px);color:var(--hot-pink);}
   .contact .label{
-    font-size:11px;letter-spacing:2px;
+    font-size:10px;letter-spacing:2px;
     text-transform:uppercase;
     color:var(--lav-2);
     font-weight:700;
   }
   .contact .value{
     font-family:'Caveat',cursive;
-    font-size:1.5rem;
+    font-size:1.4rem;
     font-weight:600;
     color:var(--text);
+  }
+  @media(min-width:700px){
+    .contact-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;}
+  }
+  @media(min-width:900px){
+    .contact{padding:26px 28px;}
+    .contact:hover{
+      transform:translateY(-6px) rotate(1deg);
+      border-color:var(--pink-2);
+      box-shadow:0 18px 40px rgba(255,143,171,.3);
+    }
+    .contact:hover::after{transform:translateY(-50%) translateX(5px);color:var(--hot-pink);}
+    .contact .label{font-size:11px;}
+    .contact .value{font-size:1.5rem;}
   }
 
   /* ========== ФИНАЛЬНОЕ СООБЩЕНИЕ ========== */
@@ -629,66 +919,89 @@
     text-align:center;
     max-width:700px;
     margin:0 auto;
-    padding:60px 40px;
+    padding:50px 24px 40px;
     background:var(--white);
-    border-radius:40px;
+    border-radius:32px;
     box-shadow:0 20px 50px rgba(255,143,171,.2);
     border:3px dashed var(--pink-2);
     position:relative;
   }
   .final-message::before{
     content:'🎀';
-    position:absolute;top:-30px;left:50%;
+    position:absolute;top:-26px;left:50%;
     transform:translateX(-50%);
-    font-size:48px;
+    font-size:42px;
     background:var(--white);
-    padding:0 20px;
+    padding:0 16px;
+    line-height:1;
   }
   .final-message h2{
     font-family:'Pacifico',cursive;
-    font-size:clamp(1.8rem,4vw,2.5rem);
+    font-size:clamp(1.4rem,6vw,2rem);
     color:var(--hot-pink);
-    margin-bottom:20px;
+    margin-bottom:16px;
     font-weight:400;
+    line-height:1.2;
   }
   .final-message p{
     font-family:'Caveat',cursive;
-    font-size:24px;
-    line-height:1.6;
+    font-size:20px;
+    line-height:1.5;
     color:var(--text);
     font-weight:500;
+  }
+  @media(min-width:900px){
+    .final-message{padding:60px 40px;border-radius:40px;}
+    .final-message::before{font-size:48px;top:-30px;padding:0 20px;}
+    .final-message h2{font-size:clamp(1.8rem,4vw,2.5rem);margin-bottom:20px;}
+    .final-message p{font-size:24px;line-height:1.6;}
   }
 
   /* ========== ФУТЕР ========== */
   footer{
     position:relative;z-index:2;
     text-align:center;
-    padding:40px 20px 60px;
+    padding:30px 20px calc(var(--sab) + 90px);
     font-family:'Caveat',cursive;
-    font-size:20px;
+    font-size:18px;
     color:var(--text-soft);
   }
-  footer .heart{color:var(--hot-pink);animation:beat 1.5s infinite;display:inline-block;}
-
-  /* ========== ПРОГРЕСС ========== */
-  .progress{
-    position:fixed;top:44px;left:0;right:0;
-    height:3px;z-index:98;
+  footer .heart{
+    color:var(--hot-pink);
+    animation:beat 1.5s infinite;
+    display:inline-block;
   }
-  .progress span{
-    display:block;height:100%;width:0;
-    background:linear-gradient(90deg,var(--pink-3),var(--lav-2),var(--hot-pink));
-    border-radius:0 3px 3px 0;
-    transition:width .1s;
+  @media(min-width:900px){
+    footer{padding:40px 20px 60px;font-size:20px;}
   }
 
-  @media(max-width:600px){
-    section{padding:80px 5vw;}
-    .hero{padding-top:150px;}
+  img{max-width:100%;height:auto;}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+    }
   }
 </style>
 </head>
 <body>
+
+<!-- МУЗЫКА -->
+<audio id="bgMusic" loop preload="auto" playsinline>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- КНОПКА МУЗЫКИ -->
+<button class="music-btn" id="musicBtn" aria-label="Включить музыку">
+  <span class="eq">
+    <span></span><span></span><span></span><span></span>
+  </span>
+</button>
+
+<!-- ПОДСКАЗКА -->
+<div class="music-hint" id="musicHint">🎵 включи музыку</div>
 
 <!-- ЛЕНТОЧКА -->
 <div class="ribbon">маленький подарок для тебя</div>
@@ -709,11 +1022,11 @@
 <div class="cursor" id="cursor">🌸</div>
 
 <!-- НАВИГАЦИЯ -->
-<nav>
+<nav id="mainNav">
   <a href="#home" class="active">начало</a>
   <a href="#about">обо мне</a>
   <a href="#photos">фото</a>
-  <a href="#friends">друзья</a>
+  <a href="#friends">сестра</a>
   <a href="#facts">факты</a>
   <a href="#hobbies">хобби</a>
   <a href="#contact">связь</a>
@@ -734,7 +1047,7 @@
       <span>🌙 сова по жизни</span>
     </div>
     <div class="hero-btns">
-      <a href="#about" class="btn btn-pink">посмотреть обо мне ♡</a>
+      <a href="#about" class="btn btn-pink">обо мне ♡</a>
       <a href="#photos" class="btn btn-white">к фото →</a>
     </div>
   </div>
@@ -743,7 +1056,7 @@
       <div class="tape left"></div>
       <div class="tape right"></div>
       <div class="photo">
-        <img src="main.jpg" alt="">
+        <img src="photos/main.jpg" alt="">
       </div>
       <div class="caption">это я ✿</div>
       <div class="gift-sticker">
@@ -789,32 +1102,32 @@
   <div class="photos-wrap">
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="1.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/1.jpg" alt="" loading="lazy"></div>
       <div class="cap">С братиком😝</div>
     </div>
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="2.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/2.jpg" alt="" loading="lazy"></div>
       <div class="cap">выходной</div>
     </div>
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="3.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/3.jpg" alt="" loading="lazy"></div>
       <div class="cap">селфи ✌</div>
     </div>
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="4.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/4.jpg" alt="" loading="lazy"></div>
       <div class="cap">на природе</div>
     </div>
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="5.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/5.jpg" alt="" loading="lazy"></div>
       <div class="cap">хороший день</div>
     </div>
     <div class="photo-item reveal">
       <div class="mini-tape"></div>
-      <div class="img-wrap"><img src="6.jpg" alt=""></div>
+      <div class="img-wrap"><img src="photos/6.jpg" alt="" loading="lazy"></div>
       <div class="cap">просто так</div>
     </div>
   </div>
@@ -828,7 +1141,7 @@
     <div class="friend-card reveal">
       <div class="img-wrap">
         <span class="tag">сестричка Алла😍</span>
-        <img src="sister.jpg" alt="">
+        <img src="photos/sister.jpg" alt="" loading="lazy">
       </div>
       <h3>Моя сестра 💗</h3>
       <p>Человек, который знает меня с детства. Родной и самый близкий.</p>
@@ -836,7 +1149,7 @@
     <div class="friend-card reveal">
       <div class="img-wrap">
         <span class="tag">Лучшая Сестра😘</span>
-        <img src="sister2.jpg" alt="">
+        <img src="photos/sister2.jpg" alt="" loading="lazy">
       </div>
       <h3>Моя Алла 💗</h3>
       <p>Алла — человек, который знает меня с детства. Она помнит меня ещё совсем маленькой, помнит все мои глупости, слёзы и смех. С ней можно не притворяться — она видит меня настоящую.</p>
@@ -844,7 +1157,7 @@
     <div class="friend-card reveal">
       <div class="img-wrap">
         <span class="tag">Аллааа😻</span>
-        <img src="sister1.jpg" alt="">
+        <img src="photos/sister1.jpg" alt="" loading="lazy">
       </div>
       <h3>Кянкс 💗</h3>
       <p>Алла — родной и самый близкий человек. Та, кто всегда рядом, кто поймёт без слов и поддержит, что бы ни случилось. Моя сестра, моя опора, моя семья.</p>
@@ -903,11 +1216,11 @@
   <div class="section-label">если захочется написать</div>
   <h2 class="section-title">Где меня <span class="c2">найти</span></h2>
   <div class="contact-grid">
-    <a href="https://t.me/qwstu09" class="contact reveal" target="_blank">
+    <a href="https://t.me/qwstu09" class="contact reveal" target="_blank" rel="noopener">
       <span class="label">telegram</span>
       <span class="value">@qwstu09</span>
     </a>
-    <a href="https://instagram.com/dayusha09" class="contact reveal" target="_blank">
+    <a href="https://instagram.com/dayusha09" class="contact reveal" target="_blank" rel="noopener">
       <span class="label">instagram</span>
       <span class="value">@dayusha09</span>
     </a>
@@ -932,69 +1245,196 @@
    ========================================================= */
 const CONFIG = {
   name: "Даяна",
-  intro: "Добро пожаловать на мою маленькую страничку. Здесь — фотки, немного обо мне, мои люди и всякие рандомные штуки. Располагайся и листай 💕"
+  intro: "Добро пожаловать на мою маленькую страничку. Здесь — фотки, немного обо мне, мои люди и всякие рандомные штуки. Располагайся и листай 💕",
+  musicVolume: 0.45,        // громкость (0.0 - 1.0) — поставь меньше если громко
+  autoplayAttempt: true     // попробовать включить автоматически
 };
 
 document.getElementById('heroName').textContent = CONFIG.name;
 document.getElementById('heroIntro').textContent = CONFIG.intro;
 
 /* =========================================================
-   ЗАГРУЗКА
+   ТИП УСТРОЙСТВА
    ========================================================= */
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('loader').classList.add('hide'), 1400);
-});
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+const isMobile = window.innerWidth < 900 || isTouch;
 
 /* =========================================================
-   КУРСОР С ЦВЕТОЧКОМ
+   МУЗЫКА
    ========================================================= */
-const cursor = document.getElementById('cursor');
-const EMOJIS = ['🌸','💕','✨','🎀','💗','🌷'];
+const music = document.getElementById('bgMusic');
+const musicBtn = document.getElementById('musicBtn');
+const musicHint = document.getElementById('musicHint');
 
-document.addEventListener('mousemove', e => {
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top = e.clientY + 'px';
+music.volume = CONFIG.musicVolume;
 
-  if(Math.random() < 0.15){
-    const t = document.createElement('div');
-    t.className = 'cursor-trail';
-    t.style.left = e.clientX + 'px';
-    t.style.top = e.clientY + 'px';
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 900);
+let musicStarted = false;    // была ли музыка хоть раз запущена
+let userPaused = false;      // пользователь сам выключил (не навязываем автозапуск)
+
+function playMusic(){
+  const p = music.play();
+  if(p && p.then){
+    p.then(() => {
+      musicStarted = true;
+      musicBtn.classList.add('playing');
+      musicHint.classList.remove('show');
+    }).catch(() => {
+      // браузер заблокировал — покажем подсказку
+      showHint();
+    });
+  }
+}
+
+function pauseMusic(){
+  music.pause();
+  musicBtn.classList.remove('playing');
+}
+
+function showHint(){
+  // Показываем подсказку через 1 сек после загрузки
+  setTimeout(() => musicHint.classList.add('show'), 800);
+  // Прячем через 6 сек чтобы не мешала
+  setTimeout(() => musicHint.classList.remove('show'), 6500);
+}
+
+/* --- Клик по кнопке музыки --- */
+musicBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  if(music.paused){
+    userPaused = false;
+    playMusic();
+  } else {
+    userPaused = true;
+    pauseMusic();
   }
 });
 
-document.querySelectorAll('a, button, .photo-item, .friend-card, .hobby, .about-card, .contact, .polaroid').forEach(el => {
-  el.addEventListener('mouseenter', () => {
-    cursor.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
-    cursor.style.transform = 'translate(-50%,-50%) scale(1.5)';
-  });
-  el.addEventListener('mouseleave', () => {
-    cursor.textContent = '🌸';
-    cursor.style.transform = 'translate(-50%,-50%) scale(1)';
-  });
+/* --- Клик по подсказке — тоже включает --- */
+musicHint.addEventListener('click', e => {
+  e.stopPropagation();
+  playMusic();
+});
+
+/* --- Попытка автозапуска при заходе --- */
+window.addEventListener('load', () => {
+  if(!CONFIG.autoplayAttempt) return;
+
+  // Пробуем сразу (на desktop Chrome/Firefox иногда прокатывает)
+  setTimeout(() => {
+    const p = music.play();
+    if(p && p.then){
+      p.then(() => {
+        musicStarted = true;
+        musicBtn.classList.add('playing');
+      }).catch(() => {
+        // Заблокировано — ждём первого касания
+        showHint();
+        armFirstInteraction();
+      });
+    }
+  }, 500);
+});
+
+/* --- Автозапуск при первом касании / клике в любом месте --- */
+function armFirstInteraction(){
+  const start = () => {
+    if(!musicStarted && !userPaused){
+      playMusic();
+    }
+    document.removeEventListener('touchstart', start);
+    document.removeEventListener('click', start);
+    document.removeEventListener('keydown', start);
+  };
+  document.addEventListener('touchstart', start, { once:true, passive:true });
+  document.addEventListener('click', start, { once:true });
+  document.addEventListener('keydown', start, { once:true });
+}
+
+/* --- Синхронизация иконки, если музыка кончилась/поставили на паузу извне --- */
+music.addEventListener('play', () => musicBtn.classList.add('playing'));
+music.addEventListener('pause', () => musicBtn.classList.remove('playing'));
+
+/* --- Останавливаем музыку когда вкладка скрыта (экономия + вежливость) --- */
+let wasPlayingBeforeHide = false;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    wasPlayingBeforeHide = !music.paused;
+    if(wasPlayingBeforeHide) music.pause();
+  } else {
+    if(wasPlayingBeforeHide && !userPaused){
+      music.play().catch(() => {});
+    }
+  }
 });
 
 /* =========================================================
-   ЛЕТЯЩИЕ БЛЁСТКИ НА ФОНЕ
+   ЗАГРУЗКА
+   ========================================================= */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
+});
+
+/* =========================================================
+   КУРСОР С ЦВЕТОЧКОМ (только desktop)
+   ========================================================= */
+if(!isTouch){
+  const cursor = document.getElementById('cursor');
+  const EMOJIS = ['🌸','💕','✨','🎀','💗','🌷'];
+
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+
+    if(Math.random() < 0.15){
+      const t = document.createElement('div');
+      t.className = 'cursor-trail';
+      t.style.left = e.clientX + 'px';
+      t.style.top = e.clientY + 'px';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 900);
+    }
+  });
+
+  document.querySelectorAll('a, button, .photo-item, .friend-card, .hobby, .about-card, .contact, .polaroid').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+      cursor.style.transform = 'translate(-50%,-50%) scale(1.5)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.textContent = '🌸';
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+  });
+}
+
+/* =========================================================
+   ЛЕТЯЩИЕ БЛЁСТКИ
    ========================================================= */
 const canvas = document.getElementById('sparkles');
 const ctx = canvas.getContext('2d');
 let W, H;
-function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+function resize(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = canvas.width = innerWidth * dpr;
+  H = canvas.height = innerHeight * dpr;
+  canvas.style.width = innerWidth + 'px';
+  canvas.style.height = innerHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
 resize();
 addEventListener('resize', resize);
+addEventListener('orientationchange', () => setTimeout(resize, 200));
 
 const SPARKLE_EMOJIS = ['✨','💕','🌸','⭐','💗','🎀','🌷'];
 const sparkles = [];
+const SPARKLE_COUNT = isMobile ? 10 : 22;
 
 class Sparkle {
   constructor(){ this.reset(true); }
   reset(init){
-    this.x = Math.random()*W;
-    this.y = init ? Math.random()*H : H + 30;
-    this.size = Math.random()*14 + 10;
+    this.x = Math.random()*innerWidth;
+    this.y = init ? Math.random()*innerHeight : innerHeight + 30;
+    this.size = Math.random()*(isMobile ? 10 : 14) + 10;
     this.speed = Math.random()*0.6 + 0.25;
     this.drift = (Math.random()-0.5)*0.5;
     this.alpha = Math.random()*0.6 + 0.3;
@@ -1022,14 +1462,23 @@ class Sparkle {
     ctx.restore();
   }
 }
-for(let i=0;i<22;i++) sparkles.push(new Sparkle());
+for(let i=0;i<SPARKLE_COUNT;i++) sparkles.push(new Sparkle());
 
+let rafId;
 function loop(){
-  ctx.clearRect(0,0,W,H);
+  ctx.clearRect(0,0,innerWidth,innerHeight);
   sparkles.forEach(s => { s.update(); s.draw(); });
-  requestAnimationFrame(loop);
+  rafId = requestAnimationFrame(loop);
 }
 loop();
+
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    cancelAnimationFrame(rafId);
+  } else {
+    loop();
+  }
+});
 
 /* =========================================================
    ПОЯВЛЕНИЕ ПРИ СКРОЛЛЕ
@@ -1037,24 +1486,31 @@ loop();
 const observer = new IntersectionObserver(entries => {
   entries.forEach((e, i) => {
     if(e.isIntersecting){
-      setTimeout(() => e.target.classList.add('show'), (i % 5) * 90);
+      setTimeout(() => e.target.classList.add('show'), (i % 5) * 80);
       observer.unobserve(e.target);
     }
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 /* =========================================================
    ПРОГРЕСС
    ========================================================= */
 const bar = document.getElementById('progressBar');
+let scrollTick = false;
 window.addEventListener('scroll', () => {
-  const h = document.documentElement.scrollHeight - window.innerHeight;
-  bar.style.width = (window.scrollY / h) * 100 + '%';
-});
+  if(!scrollTick){
+    requestAnimationFrame(() => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = Math.min((window.scrollY / h) * 100, 100) + '%';
+      scrollTick = false;
+    });
+    scrollTick = true;
+  }
+}, { passive: true });
 
 /* =========================================================
-   АКТИВНАЯ ССЫЛКА
+   АКТИВНАЯ ССЫЛКА В НАВИГАЦИИ
    ========================================================= */
 const navLinks = document.querySelectorAll('nav a');
 const sections = document.querySelectorAll('section[id]');
@@ -1066,49 +1522,86 @@ const navObs = new IntersectionObserver(entries => {
       if(link) link.classList.add('active');
     }
   });
-}, { threshold: 0.4 });
+}, { threshold: 0.35 });
 sections.forEach(s => navObs.observe(s));
+
+navLinks.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const id = link.getAttribute('href');
+    const target = document.querySelector(id);
+    if(target){
+      const top = target.getBoundingClientRect().top + window.scrollY - 40;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
 
 /* =========================================================
    НАКЛОН ПОЛАРОИДОВ
    ========================================================= */
-document.querySelectorAll('.photo-item, .polaroid').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    card.style.transform = `perspective(800px) rotateY(${x*8}deg) rotateX(${-y*8}deg) scale(1.04)`;
+if(!isTouch){
+  document.querySelectorAll('.photo-item, .polaroid').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x*8}deg) rotateX(${-y*8}deg) scale(1.04)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
+}
+
+/* =========================================================
+   ТАП/КЛИК ПО ФОТО — СЕРДЕЧКИ
+   ========================================================= */
+function burstHearts(x, y, count){
+  for(let i=0;i<count;i++){
+    const h = document.createElement('div');
+    h.textContent = ['💕','✨','🌸','💗'][Math.floor(Math.random()*4)];
+    h.style.cssText = `
+      position:fixed;left:${x}px;top:${y}px;
+      font-size:${18 + Math.random()*16}px;
+      pointer-events:none;z-index:9999;
+      transform:translate(-50%,-50%);
+      will-change:transform,opacity;
+    `;
+    document.body.appendChild(h);
+    const ang = (Math.PI*2/count)*i + Math.random()*0.5;
+    const dist = 70 + Math.random()*70;
+    h.animate([
+      { transform:'translate(-50%,-50%) scale(0.5)', opacity:1 },
+      { transform:`translate(calc(-50% + ${Math.cos(ang)*dist}px), calc(-50% + ${Math.sin(ang)*dist}px)) scale(1.2)`, opacity:0 }
+    ], { duration: 800, easing:'cubic-bezier(.16,1,.3,1)' });
+    setTimeout(() => h.remove(), 800);
+  }
+}
+
+document.querySelectorAll('.photo-item img, .friend-card img').forEach(img => {
+  img.addEventListener('click', e => {
+    burstHearts(e.clientX, e.clientY, isTouch ? 5 : 6);
+    if(navigator.vibrate) navigator.vibrate(15);
   });
 });
 
 /* =========================================================
-   КЛИК ПО ФОТО — СЕРДЕЧКО
+   БЛОКИРУЕМ ДВОЙНОЙ ТАП
    ========================================================= */
-document.querySelectorAll('.photo-item img, .friend-card img').forEach(img => {
-  img.addEventListener('click', e => {
-    for(let i=0;i<6;i++){
-      const h = document.createElement('div');
-      h.textContent = ['💕','✨','🌸','💗'][Math.floor(Math.random()*4)];
-      h.style.cssText = `
-        position:fixed;left:${e.clientX}px;top:${e.clientY}px;
-        font-size:${18 + Math.random()*16}px;
-        pointer-events:none;z-index:9999;
-        transform:translate(-50%,-50%);
-      `;
-      document.body.appendChild(h);
-      const ang = (Math.PI*2/6)*i + Math.random()*0.5;
-      const dist = 80 + Math.random()*80;
-      h.animate([
-        { transform:'translate(-50%,-50%) scale(0.5)', opacity:1 },
-        { transform:`translate(calc(-50% + ${Math.cos(ang)*dist}px), calc(-50% + ${Math.sin(ang)*dist}px)) scale(1.2)`, opacity:0 }
-      ], { duration: 900, easing:'cubic-bezier(.16,1,.3,1)' });
-      setTimeout(() => h.remove(), 900);
-    }
-  });
-});
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if(now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+
+/* =========================================================
+   СТРАХОВКА ОТ ЗАВИСШЕГО ЗАГРУЗЧИКА
+   ========================================================= */
+setTimeout(() => {
+  document.getElementById('loader').classList.add('hide');
+}, 3500);
 </script>
 </body>
 </html>
